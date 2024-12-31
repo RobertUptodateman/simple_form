@@ -1,8 +1,15 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
+  console.log('Function invoked with event:', {
+    method: event.httpMethod,
+    headers: event.headers,
+    body: event.body
+  });
+
   // Разрешаем CORS
   if (event.httpMethod === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return {
       statusCode: 200,
       headers: {
@@ -16,6 +23,7 @@ exports.handler = async function(event, context) {
 
   // Проверяем метод
   if (event.httpMethod !== "POST") {
+    console.log('Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       headers: {
@@ -28,9 +36,15 @@ exports.handler = async function(event, context) {
   try {
     // Получаем данные из тела запроса
     const { fullName, inn } = JSON.parse(event.body);
+    console.log('Received data:', { fullName, inn });
 
     // Проверяем наличие переменных окружения
     const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
+    console.log('Environment check:', {
+      hasBotToken: !!TELEGRAM_BOT_TOKEN,
+      hasChatId: !!TELEGRAM_CHAT_ID
+    });
+
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       throw new Error("Missing environment variables");
     }
@@ -43,6 +57,8 @@ exports.handler = async function(event, context) {
 🔢 ИНН: <b>${inn}</b>
 📅 Дата: <b>${new Date().toLocaleString()}</b>
 `;
+
+    console.log('Sending message to Telegram');
 
     // Отправляем в Telegram
     const response = await fetch(
@@ -61,6 +77,7 @@ exports.handler = async function(event, context) {
     );
 
     const data = await response.json();
+    console.log('Telegram API response:', data);
 
     if (!data.ok) {
       throw new Error(data.description || "Telegram API error");
@@ -78,7 +95,11 @@ exports.handler = async function(event, context) {
       })
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
+
     return {
       statusCode: 500,
       headers: {
