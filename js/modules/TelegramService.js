@@ -1,33 +1,41 @@
+import { CONFIG } from '../config.js';
+
 /**
- * Сервис для отправки данных в Telegram
+ * Сервис для работы с Telegram Bot API
+ * Отвечает за отправку сообщений в Telegram
  */
 export class TelegramService {
+    constructor() {
+        // URL будет автоматически определяться в зависимости от окружения
+        this.apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8888/.netlify/functions/send-to-telegram'
+            : '/.netlify/functions/send-to-telegram';
+    }
+
     /**
-     * Отправляет данные формы в Telegram
-     * @param {Object} data - Данные формы
-     * @param {string} data.name - ФИО
-     * @param {string} data.inn - ИНН
-     * @returns {Promise<boolean>} - Результат отправки
+     * Отправить сообщение через Telegram бота
+     * @param {string} fullName - ФИО
+     * @param {string} inn - ИНН
+     * @returns {Promise<Object>} Результат отправки
      */
-    static async sendData(data) {
+    async sendMessage(fullName, inn) {
         try {
-            const response = await fetch('/api/send-telegram', {
+            const response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify({ fullName, inn })
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
-                throw new Error(result.error || 'Ошибка отправки данных');
+                const error = await response.json();
+                throw new Error(error.message || 'Network response was not ok');
             }
 
-            return true;
+            return await response.json();
         } catch (error) {
-            console.error('Ошибка отправки в Telegram:', error);
+            console.error('Error sending message:', error);
             throw error;
         }
     }

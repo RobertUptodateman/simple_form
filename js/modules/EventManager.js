@@ -1,14 +1,14 @@
 import { StateManager } from './StateManager.js';
 import { DOMManager } from './DOMManager.js';
 import { TelegramService } from './TelegramService.js';
-import { MessageService } from './MessageService.js';
 
 /**
- * Менеджер событий формы
+ * Менеджер событий
+ * Отвечает за обработку всех событий формы
  */
 export class EventManager {
     /**
-     * Инициализировать обработчики событий
+     * Инициализация всех обработчиков событий
      */
     static initialize() {
         this.initializeFormEvents();
@@ -16,6 +16,7 @@ export class EventManager {
 
     /**
      * Инициализация событий формы
+     * Включает обработку ввода и отправки формы
      */
     static initializeFormEvents() {
         const form = DOMManager.getElement(DOMManager.SELECTORS.form);
@@ -30,14 +31,14 @@ export class EventManager {
 
         // Обработка ввода ИНН
         innInput.addEventListener('input', (e) => {
-            const value = e.target.value.replace(/\D/g, '');
+            const value = e.target.value.replace(/\D/g, ''); // Оставляем только цифры
             e.target.value = value;
             StateManager.updateFormField('inn', value);
             
             if (value.length === 12) {
                 DOMManager.clearError(innInput);
             } else if (value.length > 0) {
-                DOMManager.showError(innInput, MessageService.MESSAGES.VALIDATION_ERROR.INN_LENGTH);
+                DOMManager.showError(innInput, 'ИНН должен содержать 12 цифр');
             }
             
             DOMManager.updateButtonState(StateManager.getState().form.isValid);
@@ -55,43 +56,25 @@ export class EventManager {
                 try {
                     // Блокируем кнопку и меняем текст
                     submitButton.disabled = true;
-                    submitButton.textContent = MessageService.MESSAGES.SENDING;
-
-                    // Получаем актуальные значения из полей формы
-                    const formData = {
-                        name: fullNameInput.value.trim(),
-                        inn: innInput.value.trim()
-                    };
+                    submitButton.textContent = 'Отправка...';
                     
-                    // Отправляем данные через Netlify Function
-                    const response = await fetch('/.netlify/functions/send-telegram', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(MessageService.MESSAGES.SERVER_ERROR);
-                    }
-
+                    // Отправляем данные в Telegram
+                    await TelegramService.sendMessage(state.form);
+                    
                     // Очищаем форму после успешной отправки
                     form.reset();
                     StateManager.updateFormField('fullName', '');
                     StateManager.updateFormField('inn', '');
                     
                     // Показываем сообщение об успехе
-                    MessageService.showMessage(MessageService.MESSAGES.SUCCESS);
+                    alert('Форма успешно отправлена!');
                 } catch (error) {
-                    MessageService.showError(error);
+                    alert(error.message);
                 } finally {
                     // Возвращаем кнопку в исходное состояние
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
                 }
-            } else {
-                MessageService.showMessage(MessageService.MESSAGES.FORM_INVALID);
             }
         });
     }

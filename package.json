@@ -2,11 +2,14 @@
   "name": "simple_form",
   "version": "1.0.0",
   "description": "Simple form with Telegram integration",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "netlify dev"
   },
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "netlify-cli": "^17.10.1"

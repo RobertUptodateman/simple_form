@@ -1,8 +1,26 @@
+const fetch = require('node-fetch');
+
 exports.handler = async function(event, context) {
+  // Разрешаем CORS
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      },
+      body: ''
+    };
+  }
+
   // Проверяем метод
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify({ message: "Method not allowed" })
     };
   }
@@ -18,7 +36,13 @@ exports.handler = async function(event, context) {
     }
 
     // Формируем сообщение
-    const message = `Новая заявка:\nФИО: ${fullName}\nИНН: ${inn}`;
+    const message = `
+<b>Новая заявка с сайта</b>
+
+👤 ФИО: <b>${fullName}</b>
+🔢 ИНН: <b>${inn}</b>
+📅 Дата: <b>${new Date().toLocaleString()}</b>
+`;
 
     // Отправляем в Telegram
     const response = await fetch(
@@ -45,19 +69,27 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type'
       },
-      body: JSON.stringify({ message: "Message sent successfully" })
+      body: JSON.stringify({ 
+        success: true,
+        message: "Message sent successfully" 
+      })
     };
   } catch (error) {
+    console.error('Error:', error);
     return {
       statusCode: 500,
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type'
       },
-      body: JSON.stringify({ message: "Error sending message", error: error.message })
+      body: JSON.stringify({ 
+        success: false,
+        message: "Error sending message", 
+        error: error.message 
+      })
     };
   }
 };
