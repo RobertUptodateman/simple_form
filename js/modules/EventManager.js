@@ -1,6 +1,7 @@
 import { StateManager } from './StateManager.js';
 import { DOMManager } from './DOMManager.js';
 import { TelegramService } from './TelegramService.js';
+import { MessageService } from './MessageService.js';
 
 /**
  * Менеджер событий формы
@@ -36,7 +37,7 @@ export class EventManager {
             if (value.length === 12) {
                 DOMManager.clearError(innInput);
             } else if (value.length > 0) {
-                DOMManager.showError(innInput, 'ИНН должен содержать 12 цифр');
+                DOMManager.showError(innInput, MessageService.MESSAGES.VALIDATION_ERROR.INN_LENGTH);
             }
             
             DOMManager.updateButtonState(StateManager.getState().form.isValid);
@@ -54,7 +55,7 @@ export class EventManager {
                 try {
                     // Блокируем кнопку и меняем текст
                     submitButton.disabled = true;
-                    submitButton.textContent = 'Отправка...';
+                    submitButton.textContent = MessageService.MESSAGES.SENDING;
 
                     // Получаем актуальные значения из полей формы
                     const formData = {
@@ -72,7 +73,7 @@ export class EventManager {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Ошибка отправки данных');
+                        throw new Error(MessageService.MESSAGES.SERVER_ERROR);
                     }
 
                     // Очищаем форму после успешной отправки
@@ -81,15 +82,16 @@ export class EventManager {
                     StateManager.updateFormField('inn', '');
                     
                     // Показываем сообщение об успехе
-                    alert('Форма успешно отправлена!');
+                    MessageService.showMessage(MessageService.MESSAGES.SUCCESS);
                 } catch (error) {
-                    console.error('Ошибка:', error);
-                    alert(error.message);
+                    MessageService.showError(error);
                 } finally {
                     // Возвращаем кнопку в исходное состояние
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
                 }
+            } else {
+                MessageService.showMessage(MessageService.MESSAGES.FORM_INVALID);
             }
         });
     }
