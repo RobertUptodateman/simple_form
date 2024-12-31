@@ -1,5 +1,3 @@
-import { CONFIG } from '../config.js';
-
 /**
  * Сервис для работы с Telegram Bot API
  * Отвечает за отправку сообщений в Telegram

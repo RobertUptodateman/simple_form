@@ -46,7 +46,7 @@ export class EventManager {
         });
 
         // Обработка отправки формы
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             const state = StateManager.getState();
             
@@ -54,17 +54,16 @@ export class EventManager {
                 const submitButton = DOMManager.getElement(DOMManager.SELECTORS.submitButton);
                 const originalText = submitButton.textContent;
                 
-                try {
-                    // Блокируем кнопку и меняем текст
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Отправка...';
-                    
-                    // Отправляем данные в Telegram
-                    await this.telegramService.sendMessage(
-                        state.form.fullName,
-                        state.form.inn
-                    );
-                    
+                // Блокируем кнопку и меняем текст
+                submitButton.disabled = true;
+                submitButton.textContent = 'Отправка...';
+                
+                // Отправляем данные в Telegram
+                this.telegramService.sendMessage(
+                    state.form.fullName,
+                    state.form.inn
+                )
+                .then(() => {
                     // Очищаем форму после успешной отправки
                     form.reset();
                     StateManager.updateFormField('fullName', '');
@@ -72,14 +71,16 @@ export class EventManager {
                     
                     // Показываем сообщение об успехе
                     alert('Форма успешно отправлена!');
-                } catch (error) {
+                })
+                .catch((error) => {
                     console.error('Error:', error);
                     alert('Ошибка при отправке формы. Попробуйте позже.');
-                } finally {
+                })
+                .finally(() => {
                     // Возвращаем кнопку в исходное состояние
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
-                }
+                });
             }
         });
     }
