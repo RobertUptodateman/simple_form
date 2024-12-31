@@ -1,81 +1,43 @@
-/* Базовые стили */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* Кастомные стили */
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    padding: 20px;
+    font-family: 'Roboto', system-ui, sans-serif;
+    background: linear-gradient(135deg, #E8F0FE 0%, #F5F7FA 100%);
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
+/* Кастомизация Bootstrap */
+.btn-primary {
+    background-color: #4A90E2;
+    border-color: #4A90E2;
 }
 
-header {
-    margin-bottom: 30px;
-    text-align: center;
+.btn-primary:hover {
+    background-color: #357ABD;
+    border-color: #357ABD;
 }
 
-h1 {
-    color: #333;
-    margin-bottom: 20px;
+.form-control:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25);
 }
 
-h2 {
-    color: #444;
-    margin-bottom: 15px;
+/* Анимация появления */
+.card {
+    animation: fadeIn 0.5s ease-out;
 }
 
-p {
-    margin-bottom: 25px;
-    color: #666;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-form {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+/* Предотвращаем зум на iOS */
+.form-control-lg {
     font-size: 16px;
-}
-
-input:focus {
-    outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
-}
-
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #45a049;
+    height: 54px;
 }
