@@ -8,37 +8,36 @@
 - Валидация ИНН (12 цифр)
 - Адаптивный дизайн на Bootstrap 5
 - Отправка данных через Telegram Bot API
+- Безопасное хранение конфигурации через переменные окружения
 
 ## Установка
 
-1. Скопируйте файлы проекта
-2. Создайте файл `js/config.js` на основе `js/config.example.js`:
-   ```javascript
-   export const CONFIG = {
-       TELEGRAM_BOT_TOKEN: 'YOUR_BOT_TOKEN_HERE',
-       TELEGRAM_CHAT_ID: 'YOUR_CHAT_ID_HERE'
-   };
-   ```
-
-## Настройка Telegram бота
-
-1. Создайте бота через [@BotFather](https://t.me/BotFather):
+1. Форкните репозиторий
+2. Создайте бота через [@BotFather](https://t.me/BotFather):
    - Отправьте команду `/newbot`
    - Следуйте инструкциям
-   - Скопируйте полученный токен в `config.js`
+   - Сохраните полученный токен
 
-2. Получите ID чата:
+3. Получите ID чата:
    - Добавьте бота в нужный чат
    - Отправьте в чат любое сообщение
    - Откройте в браузере: `https://api.telegram.org/bot<ВАШ_ТОКЕН>/getUpdates`
    - Найдите `"chat":{"id":` - это и есть ID чата
-   - Скопируйте ID в `config.js`
+
+4. Разверните на Netlify:
+   - Войдите на [netlify.com](https://netlify.com)
+   - Нажмите "Add new site" > "Import an existing project"
+   - Выберите ваш форк репозитория
+   - В настройках сайта (Site settings > Environment variables) добавьте:
+     - `TELEGRAM_BOT_TOKEN` - токен вашего бота
+     - `TELEGRAM_CHAT_ID` - ID чата для отправки сообщений
 
 ## Технологии
 
 - HTML5
 - CSS3 (Bootstrap 5.3.2)
 - JavaScript (ES6+)
+- Netlify Functions
 - Telegram Bot API
 
 ## Структура проекта
@@ -47,23 +46,33 @@
 simple_form/
 ├── index.html          # Главная страница
 ├── styles.css          # Кастомные стили
+├── netlify.toml        # Конфигурация Netlify
 ├── js/
-│   ├── config.js       # Конфигурация (создать из config.example.js)
 │   ├── script.js       # Основной скрипт
 │   └── modules/        # Модули
 │       ├── DOMManager.js      # Управление DOM
 │       ├── EventManager.js    # Обработка событий
 │       ├── StateManager.js    # Управление состоянием
+│       ├── MessageService.js  # Сервис сообщений
 │       └── TelegramService.js # Работа с Telegram API
+└── netlify/
+    └── functions/      # Serverless функции
+        ├── package.json      # Зависимости функций
+        └── send-telegram.js  # Отправка в Telegram
 ```
 
-## Запуск
+## Локальная разработка
 
-- Локально: откройте `index.html` в браузере
-- На хостинге: разместите файлы на веб-сервере и создайте `config.js`
+1. Установите [Netlify CLI](https://docs.netlify.com/cli/get-started/):
+   ```bash
+   npm install netlify-cli -g
+   ```
+
+2. Запустите локальный сервер:
+   ```bash
+   netlify dev
+   ```
 
 ## Демо
 
-Рабочая версия доступна по адресу: [https://robertuptodateman.github.io/simple_form/](https://robertuptodateman.github.io/simple_form/)
-
-⚠️ Для работы с демо версией необходимо создать собственного бота и указать его токен в `config.js`.
+Рабочая версия доступна по адресу: [https://simple-form-telegram.netlify.app](https://simple-form-telegram.netlify.app)
