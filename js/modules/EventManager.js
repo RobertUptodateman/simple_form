@@ -55,13 +55,26 @@ export class EventManager {
                     // Блокируем кнопку и меняем текст
                     submitButton.disabled = true;
                     submitButton.textContent = 'Отправка...';
+
+                    // Получаем актуальные значения из полей формы
+                    const formData = {
+                        name: fullNameInput.value.trim(),
+                        inn: innInput.value.trim()
+                    };
                     
                     // Отправляем данные через Netlify Function
-                    await TelegramService.sendData({
-                        name: state.form.fullName,
-                        inn: state.form.inn
+                    const response = await fetch('/.netlify/functions/send-telegram', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
                     });
-                    
+
+                    if (!response.ok) {
+                        throw new Error('Ошибка отправки данных');
+                    }
+
                     // Очищаем форму после успешной отправки
                     form.reset();
                     StateManager.updateFormField('fullName', '');
@@ -70,6 +83,7 @@ export class EventManager {
                     // Показываем сообщение об успехе
                     alert('Форма успешно отправлена!');
                 } catch (error) {
+                    console.error('Ошибка:', error);
                     alert(error.message);
                 } finally {
                     // Возвращаем кнопку в исходное состояние
