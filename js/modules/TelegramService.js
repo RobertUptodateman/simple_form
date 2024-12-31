@@ -1,5 +1,3 @@
-import { CONFIG } from '../config.js';
-
 /**
  * Сервис для отправки данных в Telegram
  */

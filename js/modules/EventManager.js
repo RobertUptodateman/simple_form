@@ -3,72 +3,80 @@ import { DOMManager } from './DOMManager.js';
 import { TelegramService } from './TelegramService.js';
 
 /**
- * Менеджер событий
- * Отвечает за обработку всех событий формы
+ * Менеджер событий формы
  */
 export class EventManager {
     /**
      * Инициализировать обработчики событий
-     * @param {StateManager} stateManager - Менеджер состояния
-     * @param {DOMManager} domManager - Менеджер DOM
      */
-    static init(stateManager, domManager) {
-        this.stateManager = stateManager;
-        this.domManager = domManager;
-        this.setupFormSubmit();
-        this.setupInputValidation();
+    static initialize() {
+        this.initializeFormEvents();
     }
 
     /**
-     * Настроить обработку отправки формы
+     * Инициализация событий формы
      */
-    static setupFormSubmit() {
-        const form = this.domManager.getForm();
-        
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    static initializeFormEvents() {
+        const form = DOMManager.getElement(DOMManager.SELECTORS.form);
+        const fullNameInput = DOMManager.getElement(DOMManager.SELECTORS.fullName);
+        const innInput = DOMManager.getElement(DOMManager.SELECTORS.inn);
+
+        // Обработка ввода ФИО
+        fullNameInput.addEventListener('input', (e) => {
+            StateManager.updateFormField('fullName', e.target.value);
+            DOMManager.updateButtonState(StateManager.getState().form.isValid);
+        });
+
+        // Обработка ввода ИНН
+        innInput.addEventListener('input', (e) => {
+            const value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            StateManager.updateFormField('inn', value);
             
-            if (!this.stateManager.isFormValid()) {
-                this.domManager.showError('Пожалуйста, исправьте ошибки в форме');
-                return;
+            if (value.length === 12) {
+                DOMManager.clearError(innInput);
+            } else if (value.length > 0) {
+                DOMManager.showError(innInput, 'ИНН должен содержать 12 цифр');
             }
-
-            const formData = {
-                name: this.stateManager.getFullName(),
-                inn: this.stateManager.getInn()
-            };
-
-            try {
-                this.domManager.setSubmitting(true);
-                await TelegramService.sendData(formData);
-                this.domManager.showSuccess('Данные успешно отправлены');
-                form.reset();
-                this.stateManager.resetState();
-            } catch (error) {
-                this.domManager.showError(error.message);
-            } finally {
-                this.domManager.setSubmitting(false);
-            }
-        });
-    }
-
-    /**
-     * Настроить валидацию при вводе
-     */
-    static setupInputValidation() {
-        const fullNameInput = this.domManager.getFullNameInput();
-        const innInput = this.domManager.getInnInput();
-
-        fullNameInput.addEventListener('input', (event) => {
-            const value = event.target.value;
-            const isValid = this.stateManager.validateFullName(value);
-            this.domManager.updateFullNameValidation(isValid);
+            
+            DOMManager.updateButtonState(StateManager.getState().form.isValid);
         });
 
-        innInput.addEventListener('input', (event) => {
-            const value = event.target.value;
-            const isValid = this.stateManager.validateInn(value);
-            this.domManager.updateInnValidation(isValid);
+        // Обработка отправки формы
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const state = StateManager.getState();
+            
+            if (state.form.isValid) {
+                const submitButton = DOMManager.getElement(DOMManager.SELECTORS.submitButton);
+                const originalText = submitButton.textContent;
+                
+                try {
+                    // Блокируем кнопку и меняем текст
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Отправка...';
+                    
+                    // Отправляем данные через Netlify Function
+                    await TelegramService.sendData({
+                        name: state.form.fullName,
+                        inn: state.form.inn
+                    });
+                    
+                    // Очищаем форму после успешной отправки
+                    form.reset();
+                    StateManager.updateFormField('fullName', '');
+                    StateManager.updateFormField('inn', '');
+                    
+                    // Показываем сообщение об успехе
+                    alert('Форма успешно отправлена!');
+                } catch (error) {
+                    alert(error.message);
+                } finally {
+                    // Возвращаем кнопку в исходное состояние
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                }
+            }
         });
     }
 }
