@@ -6,10 +6,11 @@ import { CONFIG } from '../config.js';
  */
 export class TelegramService {
     constructor() {
-        // URL будет автоматически определяться в зависимости от окружения
-        this.apiUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8888/.netlify/functions/send-to-telegram'
-            : '/.netlify/functions/send-to-telegram';
+        const baseUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8888'
+            : 'https://simplesimpleform.netlify.app';
+        
+        this.apiUrl = `${baseUrl}/.netlify/functions/send-to-telegram`;
     }
 
     /**
