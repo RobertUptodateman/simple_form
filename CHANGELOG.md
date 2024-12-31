@@ -9,5 +9,12 @@
 - Удален временный файл config.js
 - Обновлен .gitignore
 
+2023-12-31 15:58 → Добавлена модульная структура JavaScript
+- Создана архитектура на основе менеджеров (State/DOM/Event)
+- Добавлена валидация формы
+- Реализована обработка ошибок
+- Обновлено подключение скриптов в HTML
+
 ## Общий комментарий
 2023-12-31 15:52 § feat: initial project setup with basic form structure
+2023-12-31 15:58 § feat: add modular JavaScript architecture with form validation
