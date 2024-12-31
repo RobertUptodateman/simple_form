@@ -11,6 +11,7 @@ export class EventManager {
      * Инициализация всех обработчиков событий
      */
     static initialize() {
+        this.telegramService = new TelegramService();
         this.initializeFormEvents();
     }
 
@@ -59,7 +60,10 @@ export class EventManager {
                     submitButton.textContent = 'Отправка...';
                     
                     // Отправляем данные в Telegram
-                    await TelegramService.sendMessage(state.form);
+                    await this.telegramService.sendMessage(
+                        state.form.fullName,
+                        state.form.inn
+                    );
                     
                     // Очищаем форму после успешной отправки
                     form.reset();
@@ -69,7 +73,8 @@ export class EventManager {
                     // Показываем сообщение об успехе
                     alert('Форма успешно отправлена!');
                 } catch (error) {
-                    alert(error.message);
+                    console.error('Error:', error);
+                    alert('Ошибка при отправке формы. Попробуйте позже.');
                 } finally {
                     // Возвращаем кнопку в исходное состояние
                     submitButton.disabled = false;
