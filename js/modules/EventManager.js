@@ -46,41 +46,40 @@ export class EventManager {
         });
 
         // Обработка отправки формы
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const state = StateManager.getState();
             
-            if (state.form.isValid) {
-                const submitButton = DOMManager.getElement(DOMManager.SELECTORS.submitButton);
-                const originalText = submitButton.textContent;
-                
-                // Блокируем кнопку и меняем текст
-                submitButton.disabled = true;
-                submitButton.textContent = 'Отправка...';
-                
+            const state = StateManager.getState();
+            if (!state.form.isValid) return;
+
+            const submitButton = DOMManager.getElement(DOMManager.SELECTORS.submitButton);
+            const originalText = submitButton.textContent;
+            
+            // Блокируем кнопку и меняем текст
+            submitButton.disabled = true;
+            submitButton.textContent = 'Отправка...';
+            
+            try {
                 // Отправляем данные в Telegram
-                this.telegramService.sendMessage(
+                await this.telegramService.sendMessage(
                     state.form.fullName,
                     state.form.inn
-                )
-                .then(() => {
-                    // Очищаем форму после успешной отправки
-                    form.reset();
-                    StateManager.updateFormField('fullName', '');
-                    StateManager.updateFormField('inn', '');
-                    
-                    // Показываем сообщение об успехе
-                    alert('Форма успешно отправлена!');
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    alert('Ошибка при отправке формы. Попробуйте позже.');
-                })
-                .finally(() => {
-                    // Возвращаем кнопку в исходное состояние
-                    submitButton.disabled = false;
-                    submitButton.textContent = originalText;
-                });
+                );
+                
+                // Очищаем форму после успешной отправки
+                form.reset();
+                StateManager.updateFormField('fullName', '');
+                StateManager.updateFormField('inn', '');
+                
+                // Показываем сообщение об успехе
+                alert('Форма успешно отправлена!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при отправке формы. Попробуйте позже.');
+            } finally {
+                // Возвращаем кнопку в исходное состояние
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
             }
         });
     }
